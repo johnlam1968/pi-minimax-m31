@@ -1,0 +1,52 @@
+{
+  "_comment": [
+    "Drop-in fragment for ~/.pi/agent/models.json. Verified working against the live",
+    "endpoint on 2026-10-14 — see PLAN.md §2.3. Merge the `providers` entry below into",
+    "an existing providers object, or paste it as-is if there is none.",
+    "",
+    "A SIBLING provider id on purpose: it does not shadow the built-in `minimax-cn`, so",
+    "`unregisterProvider`-equivalent rollback is deleting one block, and `minimax-cn/M3`",
+    "keeps working untouched.",
+    "",
+    "The three fields that matter, and why:",
+    "  compat.forceAdaptiveThinking  -> driver emits thinking:{type:adaptive} +",
+    "                                  output_config.effort instead of budget_tokens",
+    "  thinkingLevelMap off/minimal:null -> those levels are UNSUPPORTED (disabled 400s)",
+    "  xhigh/max mapped explicitly  -> opt-in only; pi never offers them unmapped"
+  ],
+  "providers": {
+    "minimax-cn-m31": {
+      "baseUrl": "https://api.minimaxi.com/anthropic",
+      "api": "anthropic-messages",
+      "apiKey": "$MINIMAX_CN_API_KEY",
+      "models": [
+        {
+          "id": "MiniMax-M3.1-Flash-Preview",
+          "name": "MiniMax M3.1 Flash Preview",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1000000,
+          "maxTokens": 512000,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "compat": {
+            "forceAdaptiveThinking": true
+          },
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        }
+      ]
+    }
+  }
+}
