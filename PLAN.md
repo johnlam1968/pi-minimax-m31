@@ -70,24 +70,61 @@ So the entire declaration is metadata, and the exact spelling is:
                       "xhigh": "xhigh", "max": "max" }
 ```
 
-### 2.3 Verified end to end, in an isolated agent directory
+### 2.3 Verified end to end, on the real agent
 
-A throwaway `PI_CODING_AGENT_DIR` with only the block from
-[`models.minimax-cn-m31.json`](models.minimax-cn-m31.json):
+Applied to `~/.pi/agent/models.json` on 2026-10-14 and confirmed in a live interactive `pi`.
 
 ```
 pi --list-models
   minimax-cn-m31  MiniMax-M3.1-Flash-Preview  1M  512K  yes  yes     ← loaded, no schema error
+  volcengine      deepseek-v4-flash-ga-260731   1.0M 393.2K yes  no    ← existing provider intact
+```
 
-pi -p --model 'minimax-cn-m31/MiniMax-M3.1-Flash-Preview:high' "What is 23*17?"
-  391                                                                     ← correct
+Every level answers, on the real agent, with empty stderr:
 
-:off → ok   :minimal → ok   :low → ok   :max → Ok.
+```
+off 391   minimal 391   low 391   medium 391   high 391   xhigh 391   max 391
 ```
 
 `off` and `minimal` returning cleanly is the load-bearing result: `{"type":"disabled"}`
-**400s**, so a clean reply proves the level was clamped away rather than sent. `models.json`
-accepts model-level `compat` — that was the open question, and it is answered yes.
+**400s**, so a correct answer from `:off` proves the level was clamped away rather than sent.
+
+A tool round-trip, from the persisted session rather than the transcript — this is where the
+interleaved-thinking contract actually gets exercised:
+
+```
+toolCall: read call_01a138c4a45b70a
+thinking block: 154 chars | signature: 32247fc3e3e48fc0d9a13acb54f2...
+```
+
+Signature present and non-empty, so `tool_use` → `tool_result` → continuation completed with
+the thinking block replayed intact.
+
+### 2.4 Two traps that cost time, both silent
+
+**The environment gates the provider, not the schema.** With `MINIMAX_CN_API_KEY` unset, the
+entry still validates and pi still starts — the provider simply does not appear in `/model`.
+Pi only lists providers whose auth resolves, and `apiKey: "$NAME"` resolves from the
+environment, not from `auth.json`. An interactive login shell exports it; a bare
+non-interactive shell does not.
+
+**`/login` cannot add it, and that is not a failure.** `/login` provisions *OAuth* providers.
+An `apiKey` provider declared in `models.json` is not OAuth, so `/login` correctly refuses —
+the credential path for it is the environment variable.
+
+### 2.5 Not to be confused with the `modelOverrides` failure
+
+Both failures look identical in `/model`: **nothing appears**. They have opposite causes, and
+only one is fixed by deleting the block. Measured in the same file, same session:
+
+| mechanism | M3.1 in `/model` |
+|---|---|
+| `providers["minimax-cn-m31"].models[]` | **1** |
+| `modelOverrides["minimax-cn/MiniMax-M3.1…"]` | **0** |
+
+`modelOverrides` is metadata *for a model that already exists*, so an unknown id is dropped
+without an error. A `providers` entry is a real registration — which is why it is listed at
+all, and why the earlier `modelOverrides` attempt never was.
 
 ---
 
