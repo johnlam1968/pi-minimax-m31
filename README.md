@@ -43,7 +43,7 @@ proves they were clamped away rather than transmitted.
 
 ## Not in scope
 
-Video is a different problem and a different repo — [`pi-video-llm`](../pi-video-llm).
+Video is a different problem and a different repo — [`harness-video-llm`](../harness-video-llm).
 `MODEL_INPUT_MODALITIES` is `["text","image"]` and enforced by the schema, so no `models.json`
 entry can express video. Audio is rejected by MiniMax outright (error 2013).
 

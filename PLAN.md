@@ -2,7 +2,7 @@
 
 Make `MiniMax-M3.1-Flash-Preview` usable in [Pi](https://github.com/earendil-works/pi) **without**
 the video capability. Video is scoped out and tracked separately in
-[`pi-video-llm`](../pi-video-llm).
+[`harness-video-llm`](../harness-video-llm).
 
 Last updated 2026-10-14. Status: ⬜ not started · 🟡 in progress · ✅ done
 
@@ -164,7 +164,7 @@ agents, Option A is 24× cheaper and does exactly the same thing.
 
 - **No video.** `input` stays `["text","image"]`. Video needs a block-type rewrite that cannot
   be expressed in `models.json` at all — `MODEL_INPUT_MODALITIES` is `["text","image"]` and is
-  enforced by the schema. See [`pi-video-llm`](../pi-video-llm/PLAN.md).
+  enforced by the schema. See [`harness-video-llm`](../harness-video-llm/PLAN.md).
 - **No audio.** MiniMax rejects `type:"audio"` outright (error 2013).
 - **No cost change.** M3.1 ships zero cost on M Plan / MiniMax Code, so the entry declares
   zero. If you ever pay per token, that line is the thing to fix.
